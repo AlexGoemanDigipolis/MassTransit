@@ -5,7 +5,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
     using System.Linq;
     using Builders;
     using GreenPipes;
-    using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Metadata;
     using Specifications;
@@ -18,19 +17,17 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         where TMessage : class
     {
         readonly string _consumerName;
-        readonly IMessageTopology<TMessage> _messageTopology;
         readonly IActiveMqMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
 
-        public ActiveMqMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IActiveMqMessagePublishTopology<TMessage> publishTopology)
+        public ActiveMqMessageConsumeTopology(IActiveMqMessagePublishTopology<TMessage> publishTopology)
         {
-            _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
-            _consumerName = $"Consumer.{{queue}}.VirtualTopic.{messageTopology.EntityName}";
+            _consumerName = $"Consumer.{{queue}}.{_publishTopology.Topic.EntityName}";
             if (ActiveMqArtemisSupport.EnableArtemisVirtualTopicNamingSupport)
             {
-                _consumerName = $"VirtualTopic.{messageTopology.EntityName}::Consumer.{{queue}}.VirtualTopic.{messageTopology.EntityName}";
+                _consumerName = $"{_publishTopology.Topic.EntityName}::Consumer.{{queue}}.{_publishTopology.Topic.EntityName}";
             }
 
             _specifications = new List<IActiveMqConsumeTopologySpecification>();

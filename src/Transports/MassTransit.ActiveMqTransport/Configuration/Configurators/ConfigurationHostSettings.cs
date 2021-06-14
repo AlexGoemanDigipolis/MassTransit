@@ -27,7 +27,7 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
             if (!string.IsNullOrEmpty(address.UserInfo))
             {
-                string[] parts = address.UserInfo.Split(':');
+                var parts = address.UserInfo.Split(':');
                 Username = parts[0];
 
                 if (parts.Length >= 2)
@@ -67,7 +67,7 @@ namespace MassTransit.ActiveMqTransport.Configurators
                 _logDebug($"Creating connection to {BrokerAddress}");
             }
 
-            var connection = factory.CreateConnection(Username, Password);
+            var connection = factory.ConnectionFactory.CreateConnection(Username, Password);
 
             if (ActiveMqArtemisSupport.EnableExtraConnectionLogging)
             {
