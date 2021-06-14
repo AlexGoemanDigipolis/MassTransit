@@ -77,11 +77,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             {
                 LogContext.Current = _context.LogContext;
 
-                }
-
                 if (ActiveMqArtemisSupport.EnableExtraConnectionLogging)
                 {
                     _logConnectionInfo($"Received message from {GetRemoteAddress(_session.ConnectionContext?.Connection)}");
+                }
+
                 var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);
 
                 try
