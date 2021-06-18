@@ -8,6 +8,7 @@
   <PropertyGroup>
     <PackageTags>MassTransit</PackageTags>
     <Description>$(Description)</Description>
+    <Version>7.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
