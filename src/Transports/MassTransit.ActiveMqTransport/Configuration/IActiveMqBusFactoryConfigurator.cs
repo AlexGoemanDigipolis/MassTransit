@@ -1,4 +1,6 @@
-﻿namespace MassTransit.ActiveMqTransport
+﻿using MassTransit.ActiveMqTransport.Configurators;
+
+namespace MassTransit.ActiveMqTransport
 {
     using System;
     using Topology;
@@ -35,5 +37,15 @@
         /// <param name="settings"></param>
         /// <returns></returns>
         void Host(ActiveMqHostSettings settings);
+
+        public ActiveMqBindingConsumeTopologySpecificationFactoryMethod BindingConsumeTopologySpecificationFactoryMethod
+        {
+            get;
+            set;
+        }
+
+        public void EnableArtemisBinding();
+
+        void UpdateReceiveQueueName(Func<string, string> transformReceiveQueueName);
     }
 }

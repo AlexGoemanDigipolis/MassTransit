@@ -5,10 +5,12 @@
     using BusConfigurators;
     using Configuration;
     using GreenPipes;
+    using MassTransit.ActiveMqTransport.Topology.Specifications;
     using MassTransit.Configuration;
     using Topology;
     using Topology.Settings;
 
+    public delegate IActiveMqBindingConsumeTopologySpecification ActiveMqBindingConsumeTopologySpecificationFactoryMethod(string topic);
 
     public class ActiveMqBusFactoryConfigurator :
         BusFactoryConfigurator,
@@ -18,6 +20,8 @@
         readonly IActiveMqBusConfiguration _busConfiguration;
         readonly IActiveMqHostConfiguration _hostConfiguration;
         readonly QueueReceiveSettings _settings;
+
+        
 
         public ActiveMqBusFactoryConfigurator(IActiveMqBusConfiguration busConfiguration)
             : base(busConfiguration)
@@ -96,6 +100,28 @@
 
             if (string.IsNullOrWhiteSpace(_settings.EntityName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
+        }
+
+        public ActiveMqBindingConsumeTopologySpecificationFactoryMethod BindingConsumeTopologySpecificationFactoryMethod
+        {
+            get => _busConfiguration.BindingConsumeTopologySpecificationFactoryMethod;
+            set => _busConfiguration.BindingConsumeTopologySpecificationFactoryMethod = value;
+        }
+
+        public void EnableArtemisBinding()
+        {
+            BindingConsumeTopologySpecificationFactoryMethod = (string topic) =>
+            {
+                return new ArtemisBindConsumeTopologySpecification(topic);
+            };
+        }
+
+        public void UpdateReceiveQueueName(Func<string, string> transformReceiveQueueName)
+        {
+            var entityNameTransformed = transformReceiveQueueName?.Invoke(_settings.EntityName);
+            _settings.EntityName = entityNameTransformed;
+
+
         }
     }
 }

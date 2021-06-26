@@ -1,3 +1,5 @@
+using MassTransit.ActiveMqTransport.Topology.Specifications;
+
 namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
@@ -122,7 +124,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         [Test]
         public async Task Pub_Sub_Queue_Names_Should_Not_Contain_Periods()
         {
-            var consumeTopology = new ActiveMqConsumeTopology(null, null);
+            var consumeTopology = new ActiveMqConsumeTopology(null, null, null);
             var queueName = consumeTopology.CreateTemporaryQueueName("bus.test");
             Assert.That(queueName, Does.Not.Contain('.'));
         }
@@ -225,11 +227,33 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         [Test]
         [Category("Flaky")]
-        public async Task Should_do_a_bunch_of_requests_and_responses()
+        [TestCase("activemq")]
+        [TestCase("artemis")]
+        public async Task Should_do_a_bunch_of_requests_and_responses(string flavor)
         {
-            var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
+            if (flavor == "artemis")
             {
-                sbc.ReceiveEndpoint("test", e =>
+                //ActiveMqArtemisSupport.EnableNamespaceSupport = true;  // important
+                //ActiveMqArtemisSupport.EnableArtemisVirtualTopicNamingSupport = true; //important
+                //ActiveMqArtemisSupport.EnableExtraConnectionLogging = true; // can be used for debugging
+                //ActiveMqArtemisSupport.TemporaryQueueNamePrefix = "testmasstransit."; // dot @end is important
+            }
+            
+            var bus = Bus.Factory.CreateUsingActiveMq(cfg =>
+            {
+                if (flavor == "artemis")
+                {
+                    
+                    cfg.Host("localhost", 61618, cfgHost => { });
+                    cfg.EnableArtemisBinding();
+                    cfg.UpdateReceiveQueueName((generatedName) =>
+                    {
+                        return "myprefix." + generatedName;
+                    });
+
+                }
+                
+                cfg.ReceiveEndpoint("test", e =>
                 {
                     e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
                 });
@@ -251,14 +275,32 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         [Test]
         [Category("Flaky")]
-        public async Task Should_succeed_and_connect_when_properly_configured()
+        [TestCase("activemq")]
+        [TestCase("artemis")]
+        public async Task Should_succeed_and_connect_when_properly_configured(string flavor)
         {
+            if (flavor == "artemis")
+            {
+                //ActiveMqArtemisSupport.EnableNamespaceSupport = true;  // important
+                //ActiveMqArtemisSupport.EnableArtemisVirtualTopicNamingSupport = true; //important
+                //ActiveMqArtemisSupport.EnableExtraConnectionLogging = true; // can be used for debugging
+                //ActiveMqArtemisSupport.TemporaryQueueNamePrefix = "testmasstransit."; // dot @end is important
+            }
+            
             TaskCompletionSource<bool> received = TaskUtil.GetTask<bool>();
 
             Uri sendAddress = null;
 
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
+                if (flavor == "artemis")
+                {
+                    cfg.Host("localhost", 61618, cfgHost => { });
+                    cfg.EnableArtemisBinding();
+
+
+                }
+
                 cfg.ReceiveEndpoint("input-queue", x =>
                 {
                     x.Handler<PingMessage>(async context =>
