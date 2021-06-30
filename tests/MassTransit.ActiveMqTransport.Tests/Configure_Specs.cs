@@ -244,7 +244,11 @@ namespace MassTransit.ActiveMqTransport.Tests
                 if (flavor == "artemis")
                 {
                     
-                    cfg.Host("localhost", 61618, cfgHost => { });
+                    cfg.Host("localhost", 61618, cfgHost =>
+                    {
+                        cfgHost.Username("admin");
+                        cfgHost.Password("admin");
+                    });
                     cfg.EnableArtemisBinding();
                     cfg.UpdateReceiveQueueName((generatedName) =>
                     {
@@ -295,7 +299,11 @@ namespace MassTransit.ActiveMqTransport.Tests
             {
                 if (flavor == "artemis")
                 {
-                    cfg.Host("localhost", 61618, cfgHost => { });
+                    cfg.Host("localhost", 61618, cfgHost =>
+                    {
+                        cfgHost.Username("admin");
+                        cfgHost.Password("admin");
+                    });
                     cfg.EnableArtemisBinding();
 
 
