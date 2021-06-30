@@ -26,7 +26,6 @@
 
             topologyConfiguration.BusConfiguration = busConfiguration;
             
-
             var configurator = new ActiveMqBusFactoryConfigurator(busConfiguration);
 
             configure(configurator);

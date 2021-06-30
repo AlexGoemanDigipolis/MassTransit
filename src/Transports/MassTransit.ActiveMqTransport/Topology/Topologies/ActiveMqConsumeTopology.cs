@@ -75,11 +75,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         {
             var result = base.CreateTemporaryQueueName(tag);
             var tempName = new string(result.Where(c => c != '.').ToArray());
-            // Only add prefix if NamespaceSupport has been enabled
-            if (ActiveMqArtemisSupport.EnableNamespaceSupport)
-            {
-                tempName = $"{ActiveMqArtemisSupport.TemporaryQueueNamePrefix}{tempName}";
-            }
             return tempName;
         }
 

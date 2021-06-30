@@ -25,6 +25,5 @@
         {
             configurator.SetBusFactory(new ActiveMqRegistrationBusFactory(configure));
         }
-        
     }
 }

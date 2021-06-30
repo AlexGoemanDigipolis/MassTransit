@@ -120,8 +120,6 @@
         {
             var entityNameTransformed = transformReceiveQueueName?.Invoke(_settings.EntityName);
             _settings.EntityName = entityNameTransformed;
-
-
         }
     }
 }

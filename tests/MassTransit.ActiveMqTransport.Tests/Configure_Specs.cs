@@ -231,19 +231,10 @@ namespace MassTransit.ActiveMqTransport.Tests
         [TestCase("artemis")]
         public async Task Should_do_a_bunch_of_requests_and_responses(string flavor)
         {
-            if (flavor == "artemis")
-            {
-                //ActiveMqArtemisSupport.EnableNamespaceSupport = true;  // important
-                //ActiveMqArtemisSupport.EnableArtemisVirtualTopicNamingSupport = true; //important
-                //ActiveMqArtemisSupport.EnableExtraConnectionLogging = true; // can be used for debugging
-                //ActiveMqArtemisSupport.TemporaryQueueNamePrefix = "testmasstransit."; // dot @end is important
-            }
-            
             var bus = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
                 if (flavor == "artemis")
                 {
-                    
                     cfg.Host("localhost", 61618, cfgHost =>
                     {
                         cfgHost.Username("admin");
@@ -254,7 +245,6 @@ namespace MassTransit.ActiveMqTransport.Tests
                     {
                         return "myprefix." + generatedName;
                     });
-
                 }
                 
                 cfg.ReceiveEndpoint("test", e =>
@@ -283,14 +273,6 @@ namespace MassTransit.ActiveMqTransport.Tests
         [TestCase("artemis")]
         public async Task Should_succeed_and_connect_when_properly_configured(string flavor)
         {
-            if (flavor == "artemis")
-            {
-                //ActiveMqArtemisSupport.EnableNamespaceSupport = true;  // important
-                //ActiveMqArtemisSupport.EnableArtemisVirtualTopicNamingSupport = true; //important
-                //ActiveMqArtemisSupport.EnableExtraConnectionLogging = true; // can be used for debugging
-                //ActiveMqArtemisSupport.TemporaryQueueNamePrefix = "testmasstransit."; // dot @end is important
-            }
-            
             TaskCompletionSource<bool> received = TaskUtil.GetTask<bool>();
 
             Uri sendAddress = null;
@@ -305,8 +287,6 @@ namespace MassTransit.ActiveMqTransport.Tests
                         cfgHost.Password("admin");
                     });
                     cfg.EnableArtemisBinding();
-
-
                 }
 
                 cfg.ReceiveEndpoint("input-queue", x =>

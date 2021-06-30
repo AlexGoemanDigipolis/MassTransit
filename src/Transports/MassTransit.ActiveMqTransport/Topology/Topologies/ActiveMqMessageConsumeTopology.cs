@@ -27,16 +27,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         {
             _publishTopology = publishTopology;
             _consumeTopology = consumeTopology;
-
-            //_consumerName = $"Consumer.{{queue}}.{_publishTopology.Topic.EntityName}";
-            //if (ActiveMqArtemisSupport.EnableArtemisVirtualTopicNamingSupport)
-            //{
-            //    _consumerName = $"{_publishTopology.Topic.EntityName}::Consumer.{{queue}}.{_publishTopology.Topic.EntityName}";
-            //}
-
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
-
-
         }
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
