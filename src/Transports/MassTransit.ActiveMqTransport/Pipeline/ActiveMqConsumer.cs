@@ -8,7 +8,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Microsoft.Extensions.Logging;
     using Topology;
     using Transports;
     using Transports.Metrics;
