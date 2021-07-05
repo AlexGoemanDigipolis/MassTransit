@@ -240,7 +240,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                         cfgHost.Username("admin");
                         cfgHost.Password("admin");
                     });
-                    cfg.EnableArtemisBinding();
+                    cfg.EnableArtemisCompatibility();
                     cfg.UpdateReceiveQueueName((generatedName) =>
                     {
                         return "myprefix." + generatedName;
@@ -286,7 +286,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                         cfgHost.Username("admin");
                         cfgHost.Password("admin");
                     });
-                    cfg.EnableArtemisBinding();
+                    cfg.EnableArtemisCompatibility();
                 }
 
                 cfg.ReceiveEndpoint("input-queue", x =>
