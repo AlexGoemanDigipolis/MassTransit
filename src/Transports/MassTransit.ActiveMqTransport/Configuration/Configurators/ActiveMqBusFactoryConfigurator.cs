@@ -18,7 +18,7 @@
     {
         readonly IActiveMqBusConfiguration _busConfiguration;
         readonly IActiveMqHostConfiguration _hostConfiguration;
-        QueueReceiveSettings _settings;
+        readonly QueueReceiveSettings _settings;
 
         public ActiveMqBusFactoryConfigurator(IActiveMqBusConfiguration busConfiguration)
             : base(busConfiguration)
@@ -27,7 +27,7 @@
             _hostConfiguration = busConfiguration.HostConfiguration;
 
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
-            _settings = new QueueReceiveSettings(_busConfiguration.BusEndpointConfiguration, queueName, false, true);
+            _settings = new QueueReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, false, true);
 
         }
 
