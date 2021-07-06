@@ -26,6 +26,8 @@
             _busConfiguration = busConfiguration;
             _hostConfiguration = busConfiguration.HostConfiguration;
 
+            var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
+            _settings = new QueueReceiveSettings(_busConfiguration.BusEndpointConfiguration, queueName, false, true);
 
         }
 
@@ -86,30 +88,16 @@
 
         public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
         {
-            EnsureSettingsCreated();
+            var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
+            var settings = new QueueReceiveSettings(_busConfiguration.BusEndpointConfiguration, queueName, _settings.Durable, _settings.AutoDelete);
 
-            return _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, configure);
-        }
-
-        /// <summary>
-        /// if _settings is still null then it will be initialized
-        /// otherwise nothing happens
-        /// </summary>
-        private void EnsureSettingsCreated()
-        {
-            if (_settings == null)
-            {
-                var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
-                _settings = new QueueReceiveSettings(_busConfiguration.BusEndpointConfiguration, queueName, false, true);
-            }
+            return _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(settings, _busConfiguration.BusEndpointConfiguration, configure);
         }
 
         public override IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in base.Validate())
                 yield return result;
-
-            EnsureSettingsCreated();
 
             if (string.IsNullOrWhiteSpace(_settings.EntityName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
