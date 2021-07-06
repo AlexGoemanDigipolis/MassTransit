@@ -16,17 +16,17 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         IActiveMqMessageConsumeTopologyConfigurator
         where TMessage : class
     {
-        readonly string _consumerName;
         readonly IActiveMqMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
+        readonly IActiveMqConsumerEndpointQueueNameFormatter _consumerEndpointQueueNameFormatter;
 
-        public ActiveMqMessageConsumeTopology(IActiveMqMessagePublishTopology<TMessage> publishTopology)
+        public ActiveMqMessageConsumeTopology(IActiveMqMessagePublishTopology<TMessage> publishTopology,IActiveMqConsumerEndpointQueueNameFormatter consumerEndpointQueueNameFormatter)
         {
             _publishTopology = publishTopology;
-
-            _consumerName = $"Consumer.{{queue}}.{_publishTopology.Topic.EntityName}";
-
+            
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
+
+            _consumerEndpointQueueNameFormatter = consumerEndpointQueueNameFormatter;
         }
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
@@ -43,7 +43,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
                 return;
             }
 
-            var specification = new ConsumerConsumeTopologySpecification(_publishTopology.Topic, _consumerName);
+            var specification = new ConsumerConsumeTopologySpecification(_publishTopology.Topic, _consumerEndpointQueueNameFormatter);
 
             configure?.Invoke(specification);
 

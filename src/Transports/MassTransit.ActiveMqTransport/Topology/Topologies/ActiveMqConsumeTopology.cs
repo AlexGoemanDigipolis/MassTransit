@@ -17,13 +17,20 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         readonly IMessageTopology _messageTopology;
         readonly IActiveMqPublishTopology _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
-
-        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology)
+        IActiveMqConsumerEndpointQueueNameFormatter _consumerEndpointQueueNameFormatter;
+        
+        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology,IActiveMqConsumerEndpointQueueNameFormatter consumerEndpointQueueNameFormatter)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
+            _consumerEndpointQueueNameFormatter = consumerEndpointQueueNameFormatter;
+        }
+        public IActiveMqConsumerEndpointQueueNameFormatter ConsumerEndpointQueueNameFormatter
+        {
+            get => _consumerEndpointQueueNameFormatter;
+            set => _consumerEndpointQueueNameFormatter = value;
         }
 
         IActiveMqMessageConsumeTopology<T> IActiveMqConsumeTopology.GetMessageTopology<T>()
@@ -56,9 +63,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         {
             if (string.IsNullOrEmpty(_publishTopology.VirtualTopicPrefix) || topicName.StartsWith(_publishTopology.VirtualTopicPrefix))
             {
-                var consumerName = $"Consumer.{{queue}}.{topicName}";
-
-                var specification = new ConsumerConsumeTopologySpecification(topicName, consumerName);
+                var specification = new ConsumerConsumeTopologySpecification(topicName, _consumerEndpointQueueNameFormatter);
 
                 configure?.Invoke(specification);
 
@@ -81,7 +86,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var messageTopology = new ActiveMqMessageConsumeTopology<T>(_publishTopology.GetMessageTopology<T>());
+            var messageTopology = new ActiveMqMessageConsumeTopology<T>(_publishTopology.GetMessageTopology<T>(), _consumerEndpointQueueNameFormatter);
 
             OnMessageTopologyCreated(messageTopology);
 

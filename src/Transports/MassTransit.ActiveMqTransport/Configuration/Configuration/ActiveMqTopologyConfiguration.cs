@@ -32,7 +32,7 @@
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
             _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
-            _consumeTopology = new ActiveMqConsumeTopology(messageTopology, _publishTopology);
+            _consumeTopology = new ActiveMqConsumeTopology(messageTopology, _publishTopology, consumerEndpointQueueNameFormatter: null);
         }
 
         public ActiveMqTopologyConfiguration(IActiveMqTopologyConfiguration topologyConfiguration)
@@ -41,7 +41,7 @@
             _sendTopology = topologyConfiguration.Send;
             _publishTopology = topologyConfiguration.Publish;
 
-            _consumeTopology = new ActiveMqConsumeTopology(topologyConfiguration.Message, topologyConfiguration.Publish);
+            _consumeTopology = new ActiveMqConsumeTopology(topologyConfiguration.Message, topologyConfiguration.Publish, topologyConfiguration.Consume.ConsumerEndpointQueueNameFormatter);
         }
 
         IMessageTopologyConfigurator ITopologyConfiguration.Message => _messageTopology;

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using BusConfigurators;
     using Configuration;
+    using Configuration.Definition;
     using GreenPipes;
     using MassTransit.Configuration;
     using Topology;
@@ -61,6 +62,7 @@
 
         public new IActiveMqSendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
         public new IActiveMqPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
+        public new IActiveMqConsumeTopologyConfigurator ConsumeTopology => _busConfiguration.Topology.Consume;
 
         public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint = null)
@@ -96,6 +98,11 @@
 
             if (string.IsNullOrWhiteSpace(_settings.EntityName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
+        }
+
+        public void EnableArtemis()
+        {
+            ConsumeTopology.ConsumerEndpointQueueNameFormatter = new ArtemisConsumerEndpointQueueNameFormatter();
         }
     }
 }

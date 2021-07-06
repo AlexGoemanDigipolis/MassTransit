@@ -11,5 +11,7 @@
             where T : class;
 
         void AddSpecification(IActiveMqConsumeTopologySpecification specification);
+
+        IActiveMqConsumerEndpointQueueNameFormatter ConsumerEndpointQueueNameFormatter { get; set; }
     }
 }
