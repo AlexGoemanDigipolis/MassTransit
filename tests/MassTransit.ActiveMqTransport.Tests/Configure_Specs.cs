@@ -122,7 +122,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         [Test]
         public async Task Pub_Sub_Queue_Names_Should_Not_Contain_Periods()
         {
-            var consumeTopology = new ActiveMqConsumeTopology(null, null, null);
+            var consumeTopology = new ActiveMqConsumeTopology(null, null, null,null);
             var queueName = consumeTopology.CreateTemporaryQueueName("bus.test");
             Assert.That(queueName, Does.Not.Contain('.'));
         }
@@ -225,11 +225,25 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         [Test]
         [Category("Flaky")]
-        public async Task Should_do_a_bunch_of_requests_and_responses()
+        [TestCase("activemq")]
+        [TestCase("artemis")]
+        public async Task Should_do_a_bunch_of_requests_and_responses(string flavor)
         {
-            var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
+            var bus = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                sbc.ReceiveEndpoint("test", e =>
+                if (flavor == "artemis")
+                {
+                    cfg.Host("localhost", 61618, cfgHost =>
+                    {
+                        cfgHost.Username("admin");
+                        cfgHost.Password("admin");
+                    });
+                    cfg.EnableArtemisCompatibility();
+                    cfg.SetPrefixForTemporaryQueueNames("myprefix.");
+                }
+
+
+                cfg.ReceiveEndpoint("test", e =>
                 {
                     e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
                 });
@@ -268,7 +282,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                         cfgHost.Username("admin");
                         cfgHost.Password("admin");
                     });
-                    cfg.EnableArtemis();
+                    cfg.EnableArtemisCompatibility();
                 }
                 
                 cfg.ReceiveEndpoint("input-queue", x =>

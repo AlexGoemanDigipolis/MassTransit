@@ -13,5 +13,7 @@
         void AddSpecification(IActiveMqConsumeTopologySpecification specification);
 
         IActiveMqConsumerEndpointQueueNameFormatter ConsumerEndpointQueueNameFormatter { get; set; }
+
+        IActiveMqTemporaryQueueNameFormatter TemporaryQueueNameFormatter { get; set; }
     }
 }

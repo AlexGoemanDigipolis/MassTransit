@@ -36,6 +36,8 @@
         /// <returns></returns>
         void Host(ActiveMqHostSettings settings);
 
-        public void EnableArtemis();
+        void EnableArtemisCompatibility();
+
+        void SetPrefixForTemporaryQueueNames(string prefix);
     }
 }

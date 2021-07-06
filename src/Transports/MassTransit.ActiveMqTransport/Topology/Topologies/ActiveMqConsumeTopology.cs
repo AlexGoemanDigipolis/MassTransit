@@ -18,19 +18,31 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         readonly IActiveMqPublishTopology _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
         IActiveMqConsumerEndpointQueueNameFormatter _consumerEndpointQueueNameFormatter;
-        
-        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology,IActiveMqConsumerEndpointQueueNameFormatter consumerEndpointQueueNameFormatter)
+        IActiveMqTemporaryQueueNameFormatter _temporaryQueueNameFormatter;
+
+
+        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology,
+            IActiveMqConsumerEndpointQueueNameFormatter consumerEndpointQueueNameFormatter,
+            IActiveMqTemporaryQueueNameFormatter temporaryQueueNameFormatter)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
             _consumerEndpointQueueNameFormatter = consumerEndpointQueueNameFormatter;
+            _temporaryQueueNameFormatter = temporaryQueueNameFormatter;
         }
+
         public IActiveMqConsumerEndpointQueueNameFormatter ConsumerEndpointQueueNameFormatter
         {
             get => _consumerEndpointQueueNameFormatter;
             set => _consumerEndpointQueueNameFormatter = value;
+        }
+
+        public IActiveMqTemporaryQueueNameFormatter TemporaryQueueNameFormatter
+        {
+            get => _temporaryQueueNameFormatter;
+            set => _temporaryQueueNameFormatter = value;
         }
 
         IActiveMqMessageConsumeTopology<T> IActiveMqConsumeTopology.GetMessageTopology<T>()
@@ -76,7 +88,14 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         public override string CreateTemporaryQueueName(string tag)
         {
             var result = base.CreateTemporaryQueueName(tag);
-            return new string(result.Where(c => c != '.').ToArray());
+            var generatedTempQueueName = new string(result.Where(c => c != '.').ToArray());
+            
+            if (_temporaryQueueNameFormatter != null)
+            {
+                generatedTempQueueName = _temporaryQueueNameFormatter.Format(tag, generatedTempQueueName);
+            }
+
+            return generatedTempQueueName;
         }
 
         public override IEnumerable<ValidationResult> Validate()

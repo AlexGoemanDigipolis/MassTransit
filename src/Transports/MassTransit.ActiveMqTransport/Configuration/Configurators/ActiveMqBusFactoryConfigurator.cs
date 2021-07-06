@@ -18,7 +18,7 @@
     {
         readonly IActiveMqBusConfiguration _busConfiguration;
         readonly IActiveMqHostConfiguration _hostConfiguration;
-        readonly QueueReceiveSettings _settings;
+        QueueReceiveSettings _settings;
 
         public ActiveMqBusFactoryConfigurator(IActiveMqBusConfiguration busConfiguration)
             : base(busConfiguration)
@@ -26,9 +26,7 @@
             _busConfiguration = busConfiguration;
             _hostConfiguration = busConfiguration.HostConfiguration;
 
-            var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
 
-            _settings = new QueueReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, false, true);
         }
 
         public bool Durable
@@ -88,7 +86,22 @@
 
         public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
         {
+            EnsureSettingsCreated();
+
             return _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, configure);
+        }
+
+        /// <summary>
+        /// if _settings is still null then it will be initialized
+        /// otherwise nothing happens
+        /// </summary>
+        private void EnsureSettingsCreated()
+        {
+            if (_settings == null)
+            {
+                var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
+                _settings = new QueueReceiveSettings(_busConfiguration.BusEndpointConfiguration, queueName, false, true);
+            }
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -96,13 +109,21 @@
             foreach (var result in base.Validate())
                 yield return result;
 
+            EnsureSettingsCreated();
+
             if (string.IsNullOrWhiteSpace(_settings.EntityName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
+
         }
 
-        public void EnableArtemis()
+        public void EnableArtemisCompatibility()
         {
             ConsumeTopology.ConsumerEndpointQueueNameFormatter = new ArtemisConsumerEndpointQueueNameFormatter();
+        }
+
+        public void SetPrefixForTemporaryQueueNames(string prefix)
+        {
+            ConsumeTopology.TemporaryQueueNameFormatter = new PrefixTemporaryQueueNameFormatter(prefix);
         }
     }
 }
