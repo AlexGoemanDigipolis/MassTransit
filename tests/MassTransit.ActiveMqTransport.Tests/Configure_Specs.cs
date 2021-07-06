@@ -251,7 +251,9 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         [Test]
         [Category("Flaky")]
-        public async Task Should_succeed_and_connect_when_properly_configured()
+        [TestCase("activemq")]
+        [TestCase("artemis")]
+        public async Task Should_succeed_and_connect_when_properly_configured(string flavor)
         {
             TaskCompletionSource<bool> received = TaskUtil.GetTask<bool>();
 
@@ -259,6 +261,16 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
+                if (flavor == "artemis")
+                {
+                    cfg.Host("localhost", 61618, cfgHost =>
+                    {
+                        cfgHost.Username("admin");
+                        cfgHost.Password("admin");
+                    });
+                    cfg.EnableArtemis();
+                }
+                
                 cfg.ReceiveEndpoint("input-queue", x =>
                 {
                     x.Handler<PingMessage>(async context =>
