@@ -27,8 +27,8 @@
             _hostConfiguration = busConfiguration.HostConfiguration;
 
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
+            
             _settings = new QueueReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, false, true);
-
         }
 
         public bool Durable
